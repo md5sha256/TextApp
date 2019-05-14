@@ -5,10 +5,12 @@ import com.sun.istack.internal.NotNull;
 public enum TextColour {
 
     BLUE('b'), RED('c'), YELLOW('e'), GREEN('a'), MAGENTA('d'),
-    TextColour(char code) {
+    TextColour(
+    char code)
+
+    {
 
     }
-
 
 
     /**
@@ -26,7 +28,7 @@ public enum TextColour {
             if (b[i] == code && "AaBbCcDdEeFfKkLlMmNnOoRr".indexOf(b[i + 1]) > -1) { //This checks if the second part of the message
                 //After the char is either A-F, a-f, K-O, k-o or R, r.
                 b[i] = '\u00A7'; //The '&' symbol.
-                switch (b[i+1]) {
+                switch (b[i + 1]) {
                     case 'a':
                         String coloured = string.substring(0, i) + string.substring(i).replace(code, GREEN);
                 }
@@ -36,4 +38,4 @@ public enum TextColour {
         return new String(b); //Return a string object from the char array.
     }
 
-}
+    }
