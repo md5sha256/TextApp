@@ -1,15 +1,11 @@
 package com.gmail.andrewandy.textserver;
 
 import com.gmail.andrewandy.textserver.util.Common;
-import com.gmail.andrewandy.textserver.util.FirstMessage;
 
-import javax.xml.soap.Text;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.URISyntaxException;
-import java.sql.Time;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -18,16 +14,12 @@ public class TextServer extends Thread {
     private ServerSocket serverSocket;
     private int port = -1;
     private static TextServer instance;
+    private boolean run = true;
 
     private Set<UUID> connected = new HashSet<>();
 
-
-    private TextServer() {
-
-    }
-
     public void setupServer(int port) throws IOException {
-        if (port != -1) {
+        if (this.port != -1) {
             Common.log(Level.WARNING, "&eAttempted to start the server when it was already started!");
             return;
         }
@@ -39,7 +31,7 @@ public class TextServer extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (run)
             try {
                 Socket socket = serverSocket.accept();
                 DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -47,28 +39,24 @@ public class TextServer extends Thread {
                 Object obj = null;
                 try {
                     obj = objectInputStream.readObject();
-                    if (obj instanceof FirstMessage) {
-                        System.out.println("Client ID " + ((FirstMessage) obj).getClientID() + " Has connected.");
-                        connected.add((((FirstMessage) obj).getClientID()));
+                    if (obj instanceof UUID && !connected.contains(obj)) {
+                        connected.add((UUID) obj);
                     }
                 } catch (ClassNotFoundException ex) {
                     ex.printStackTrace();
                 }
                 if (obj == null) {
-                    continue;
+                    run = false;
                 }
                 if (obj instanceof String) {
-
+                    String message = (String) obj;
+                    System.out.println(Common.colourise("&aRemote Message: &f" + message));
                 }
-
-
 
             } catch (SocketTimeoutException so) {
                 System.out.println("Connection timed out!");
-                break;
             } catch (IOException ex) {
                 ex.printStackTrace();
-                break;
             }
 
             Scanner scanner = new Scanner(System.in);
@@ -76,12 +64,11 @@ public class TextServer extends Thread {
             if (input.equalsIgnoreCase("help")) {
                 System.out.println(Common.colourise("&aThis help menu has not yet been completed."));
             }
-        }
     }
 
     public static TextServer getInstance() {
         if (instance == null) {
-            return new TextServer();
+            instance = new TextServer();
         }
         return instance;
     }
