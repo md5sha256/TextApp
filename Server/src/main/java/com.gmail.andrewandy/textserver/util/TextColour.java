@@ -14,24 +14,24 @@ enum TextColour {
     private char code;
 
     public static String translateColourCode(char code, String string) {
-        char[] b = string.toCharArray();
-        String c = new String(b);
-        for (int i = 0; i < b.length - 1; i++) {
-            if (b[i] == code && "AaBbCcDdEeFfGgRr".indexOf(b[i + 1]) > -1) { //This checks if the second part of the message
+        char[] chars = string.toCharArray();
+        String stringFromArray = new String(chars);
+        for (int index = 0; index < chars.length - 1; index++) {
+            if (chars[index] == code && "AaBbCcDdEeFfGgRr".indexOf(chars[index + 1]) > -1) { //This checks if the second part of the message
                 //After the char is either A-G or a-g or R-r
                 for (TextColour colour : values()) {
-                    if (colour.getCode() != b[i + 1]) {
+                    if (colour.getCode() != chars[index + 1]) {
                         continue;
                     }
-                    b[i] =  Character.MAX_VALUE;
-                    b[i+1] = Character.MAX_VALUE;
-                    c = new String(b);
-                    c = c.substring(0, i) + colour.getAnsi() + c.substring(i + 1);
-                    System.out.println("[" + i + "]" + " " + c);
+                    chars[index] =  Character.MAX_VALUE;
+                    chars[index+1] = Character.MAX_VALUE;
+                    stringFromArray = new String(chars);
+                    stringFromArray = stringFromArray.substring(0, index) + colour.getAnsi() + stringFromArray.substring(index + 1);
+                    System.out.println("[" + index + "]" + " " + stringFromArray);
                 }
             }
         }
-        return c;
+        return stringFromArray;
     }
 
 
