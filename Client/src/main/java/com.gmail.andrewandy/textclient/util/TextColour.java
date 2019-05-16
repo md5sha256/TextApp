@@ -1,4 +1,4 @@
-package com.gmail.andrewandy.textserver.util;
+package com.gmail.andrewandy.textclient.util;
 
 
 enum TextColour {
@@ -6,8 +6,8 @@ enum TextColour {
     BLUE('b', "\u001b[34m"), RED('c', "\u001b[31m"), YELLOW('e', "\u001b[33m"), GREEN('a', "\u001b[32m"), MAGENTA('d', "\u001b[35m"), WHITE('f', "\u001b[37m"), BLACK('g', "\u001b[30m"), RESET('r', "\u001b[0m");
 
     TextColour(char code, String ansiString) {
-        setAnsi(ansiString);
-        setCode(code);
+       setAnsi(ansiString);
+       setCode(code);
     }
 
     private String ansi;
