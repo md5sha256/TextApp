@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 
 public class TextClient {
-
+  
     private Socket socket;
     private boolean toCheckForMsg = true;
 
@@ -63,6 +63,7 @@ public class TextClient {
                     ex.printStackTrace();
                     System.out.println("Failed to disconnect.");
                 }
+
             }
         }
         return null;

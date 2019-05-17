@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
+
 public class TextServer extends Thread {
 
     private ServerSocket socket;
@@ -76,5 +77,16 @@ public class TextServer extends Thread {
      */
     private void disconnect() throws IOException{
         socket.close();
+    }
+
+    private void checkInput() {
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.next();
+        if (input.equalsIgnoreCase("help")) {
+            System.out.println(Common.colourise("&aThis help menu has not yet been completed."));
+            checkInput();
+        } else {
+            System.out.println("Unknown command...");
+        }
     }
 }

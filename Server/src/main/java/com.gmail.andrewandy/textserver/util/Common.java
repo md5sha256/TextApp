@@ -9,7 +9,7 @@ public class Common {
         return TextColour.translateColourCode('&', string);
     }
 
-    public static void log (Level level, String message) {
+    public static void log(Level level, String message) {
         Logger.getGlobal().log(level, colourise(message + "&r"));
     }
 

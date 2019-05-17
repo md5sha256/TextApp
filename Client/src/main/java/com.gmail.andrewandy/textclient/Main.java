@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Main {
+
 
     private static TextClient client;
     private static String req = "Welcome";
@@ -74,10 +74,9 @@ public class Main {
             }
         }
         catch (IOException ex) {
-            ex.printStackTrace();
+            ex.printStackTrace()
         }
-    }
-
+      
     private static String checkInput() throws IOException{
         Scanner scanner = new Scanner(System.in);
         String next = scanner.next();
