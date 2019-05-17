@@ -15,15 +15,16 @@ public class Main {
     private static boolean run = true;
 
     public static void main(String[] args) {
+        System.out.println("Please enter a port to listen from.");
+        Scanner scanner = new Scanner(System.in);
+        int port = scanner.nextInt();
             try {
-                server = TextServer.getInstance();
-                server.setupServer(9951);
+                server = new TextServer(port);
                 updateDir();
-
+                server.start();
             } catch (IOException ex) {
                 System.out.println("Connection timed out.");
             }
-            Scanner scanner = new Scanner(System.in);
             while (run) {
                 String request = scanner.next();
 
