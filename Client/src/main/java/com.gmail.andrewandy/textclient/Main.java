@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +16,7 @@ public class Main {
     static Logger logger = Logger.getLogger("Server");
     static boolean loggedon;
     static Inet4Address ip4;
+    static UUID clientID = UUID.randomUUID();
 
     public static void main(String[] args) {
 
@@ -32,6 +34,7 @@ public class Main {
             }
             client = new TextClient(9951, ip4);
             client.start();
+            client.sendMessage(clientID.toString());
             checkInput();
             System.out.println(Common.colourise("&aGood bye!"));
         } catch (IOException ex) {

@@ -70,6 +70,9 @@ public class TextServer extends Thread {
                 if (ex instanceof ClassNotFoundException) {
                     System.out.println("Client Mismatch!");
                 }
+                else if (ex instanceof SocketTimeoutException) {
+                    System.out.println("Client timed out");
+                }
                 ex.printStackTrace();
                 }
             }

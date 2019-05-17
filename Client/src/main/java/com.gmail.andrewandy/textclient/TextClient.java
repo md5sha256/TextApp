@@ -43,6 +43,14 @@ public class TextClient extends Thread {
         stream.close();
     }
 
+    public void sendObject(Object obj) throws IOException{
+        if (socket == null) {
+            throw new IllegalStateException("Server not initialised");
+        }
+        ObjectOutputStream out = new ObjectOutputStream(new DataOutputStream(socket.getOutputStream()));
+        out.writeObject(obj);
+    }
+
     public void endProcess(boolean toEnd) {
         run = toEnd;
     }
