@@ -1,11 +1,8 @@
 package com.gmail.andrewandy.textserver;
 
 import com.gmail.andrewandy.textserver.util.Common;
-import com.gmail.andrewandy.textserver.util.FirstMessage;
 
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -15,13 +12,16 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
+
 public class TextServer extends Thread {
 
     private static TextServer instance;
     private ServerSocket serverSocket;
     private int port = -1;
+
+    private boolean run = true;
+
     private Set<UUID> connected = new HashSet<>();
-    private static boolean run = true;
 
 
     private TextServer() {
@@ -35,7 +35,8 @@ public class TextServer extends Thread {
         return instance;
     }
 
-    public final void setupServer(int port) throws IOException {
+
+    public void setupServer(int port) throws IOException {
         if (this.port != -1) {
             Common.log(Level.WARNING, "&eAttempted to start the server when it was already started!");
             return;
@@ -51,28 +52,29 @@ public class TextServer extends Thread {
         while (run) {
             try {
                 Socket socket = serverSocket.accept();
-                DataInputStream in = new DataInputStream(socket.getInputStream());
-                ObjectInputStream objectInputStream = new ObjectInputStream(in);
-                Object obj = objectInputStream.readObject();
+                DataInputStream dataStream = new DataInputStream(socket.getInputStream());
+                ObjectInputStream in = new ObjectInputStream(dataStream);
+                Object obj = in.readObject();
                 if (!obj.getClass().isAssignableFrom(String.class)) {
                     System.out.println("Custom object.");
-                   break;
+                    continue;
                 }
                 System.out.println(Common.colourise("&b[Client]: Sent message" + (String) obj));
-
-            } catch (SocketTimeoutException so) {
-                System.out.println("Connection timed out!");
-                System.out.println("Client disconnected.");
-            } catch (IOException ex) {
-                ex.printStackTrace();
+                ObjectOutputStream out = new ObjectOutputStream(new DataOutputStream(socket.getOutputStream()));
+                out.writeObject(obj);
+                out.close();
+                in.close();
+                dataStream.close();
             }
-            catch (ClassNotFoundException ex) {
-                Common.log(Level.SEVERE, "Client mis-match...");
+                catch (IOException | ClassNotFoundException ex) {
+                if (ex instanceof ClassNotFoundException) {
+                    System.out.println("Client Mismatch!");
+                }
                 ex.printStackTrace();
+                }
             }
-            System.out.println("Good bye");
-        }
     }
+
 
     public void setPort(int port) {
         this.port = port;
@@ -84,8 +86,7 @@ public class TextServer extends Thread {
         if (input.equalsIgnoreCase("help")) {
             System.out.println(Common.colourise("&aThis help menu has not yet been completed."));
             checkInput();
-        }
-        else {
+        } else {
             System.out.println("Unknown command...");
         }
     }
