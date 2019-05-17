@@ -5,13 +5,12 @@ enum TextColour {
 
     BLUE('b', "\u001b[34m"), RED('c', "\u001b[31m"), YELLOW('e', "\u001b[33m"), GREEN('a', "\u001b[32m"), MAGENTA('d', "\u001b[35m"), WHITE('f', "\u001b[37m"), BLACK('g', "\u001b[30m"), RESET('r', "\u001b[0m");
 
+    private String ansi;
+    private char code;
     TextColour(char code, String ansiString) {
         setAnsi(ansiString);
         setCode(code);
     }
-
-    private String ansi;
-    private char code;
 
     public static String translateColourCode(char code, String string) {
         char[] b = string.toCharArray();
@@ -23,8 +22,8 @@ enum TextColour {
                     if (colour.getCode() != b[i + 1]) {
                         continue;
                     }
-                    b[i] =  Character.MAX_VALUE;
-                    b[i+1] = Character.MAX_VALUE;
+                    b[i] = Character.MAX_VALUE;
+                    b[i + 1] = Character.MAX_VALUE;
                     c = new String(b);
                     c = c.substring(0, i) + colour.getAnsi() + c.substring(i + 1);
                     System.out.println("[" + i + "]" + " " + c);
@@ -34,13 +33,12 @@ enum TextColour {
         return c;
     }
 
+    public String getAnsi() {
+        return ansi;
+    }
 
     private void setAnsi(String ansiString) {
         ansi = ansiString;
-    }
-
-    public String getAnsi() {
-        return ansi;
     }
 
     public char getCode() {

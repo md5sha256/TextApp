@@ -1,5 +1,7 @@
 package com.gmail.andrewandy.textserver;
 
+import com.gmail.andrewandy.textserver.util.Common;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -8,20 +10,20 @@ import java.util.logging.Logger;
 public class Main {
 
     static TextServer server;
-    Logger logger = Logger.getLogger(Main.class.getName());
     private static File currentDir;
-
+    Logger logger = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {
         try {
-            server = new TextServer(9951);
+            server = TextServer.getInstance();
+            server.setupServer(9951);
+            server.start();
             updateDir();
 
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
             System.out.println("Connection timed out.");
         }
-
     }
 
     private static void updateDir() {
