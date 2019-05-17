@@ -8,85 +8,64 @@ import java.net.Inet4Address;
 import java.net.Socket;
 import java.util.logging.Level;
 
-public class TextClient extends Thread {
+public class TextClient {
+  
+    private Socket socket;
+    private boolean toCheckForMsg = true;
 
-    private static Socket socket;
-    private static int port;
-    private static Inet4Address ip4;
-    private static TextClient instance;
-    private static boolean run = true;
-
-    public TextClient(int targetPort, Inet4Address address) throws IOException {
-        port = targetPort;
-        ip4 = address;
-        socket = new Socket(address, targetPort);
+    public TextClient(Inet4Address address, int port) throws IOException {
+        socket = new Socket(address, port);
     }
 
-    public static int getPort() {
-        return port;
-    }
+    public void sendMessage(String... message) throws IOException {
 
-    public static Inet4Address getIp4() {
-        return ip4;
-    }
-
-    public void sendMessage(String... messages) throws IOException {
-        if (socket == null) {
-            throw new IllegalStateException("Server not initialised");
+        if (socket.isClosed() || !socket.isConnected()) {
+            Common.log(Level.WARNING, "&bSocket closed or unable to connect to server. Unable to send the message.");
+            return;
         }
-        DataOutputStream stream = new DataOutputStream(socket.getOutputStream());
-        ObjectOutputStream out = new ObjectOutputStream(stream);
-        out.writeObject(messages);
-        for (String string : messages) {
-            System.out.println(Common.colourise("&e[Client]: " + string));
-        }
-        stream.close();
+        DataOutputStream outputStream = new DataOutputStream(socket.getOutputStream());
+        ObjectOutputStream out = new ObjectOutputStream(outputStream);
+        out.writeObject(message);
+        out.close();
+        outputStream.close();
+
     }
 
-    public void sendObject(Object obj) throws IOException{
-        if (socket == null) {
-            throw new IllegalStateException("Server not initialised");
-        }
-        ObjectOutputStream out = new ObjectOutputStream(new DataOutputStream(socket.getOutputStream()));
-        out.writeObject(obj);
+    public void setToCheckForMsg(boolean toCheck) {
+        this.toCheckForMsg = toCheck;
     }
 
-    public void endProcess(boolean toEnd) {
-        run = toEnd;
+    public boolean getMessageCheckStatus() {
+        return toCheckForMsg;
     }
 
-    public void disconnect() {
-        try {
-            if (!socket.isClosed()) {
-                socket.close();
-            }
-        } catch (IOException ex) {
-            Common.log(Level.SEVERE, "Unable to disconnect from remote socket!");
-            ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void run() {
-        while (run) {
-            if (socket.isClosed()) {
-                Common.log(Level.WARNING, "&eClosed socket...");
-                return;
-            }
+    public Object checkForMessage(long time) {
+        long start = System.currentTimeMillis();
+        while ((time == -1) ? toCheckForMsg : System.currentTimeMillis() < start + time) {
             try {
-                DataInputStream dataStream = new DataInputStream(socket.getInputStream());
-                ObjectInputStream in = new ObjectInputStream(dataStream);
-                Object obj = in.readObject();
-                if (obj instanceof String) {
-                    System.out.println(Common.colourise((String) obj));
-                }
-                System.out.println("Custom object was sent...");
+                while (toCheckForMsg) {
 
-            } catch (IOException ex) {
+                    DataInputStream inputStream = new DataInputStream(socket.getInputStream());
+                    ObjectInputStream in = new ObjectInputStream(inputStream);
+                    return in.readObject();
+                }
+            } catch (IOException | ClassNotFoundException ex) {
                 ex.printStackTrace();
-            } catch (ClassNotFoundException ex) {
-                Common.log(Level.SEVERE, "&cClient and Server version Mis-Match!");
+                if (ex instanceof ClassNotFoundException) {
+                    System.out.println("&cThis client may be a version behind or ahead of the server.");
+                }
+            } finally {
+                try {
+                    if (socket != null && !socket.isClosed())
+                        socket.close();
+                    System.out.println("&aDisconnected from server.");
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                    System.out.println("Failed to disconnect.");
+                }
+
             }
         }
+        return null;
     }
 }

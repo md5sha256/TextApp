@@ -6,73 +6,101 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.util.Scanner;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 public class Main {
 
-    static TextClient client;
-    static Logger logger = Logger.getLogger("Server");
-    static boolean loggedon;
-    static Inet4Address ip4;
-    static UUID clientID = UUID.randomUUID();
+
+    private static TextClient client;
+    private static String req = "Welcome";
 
     public static void main(String[] args) {
-
-        System.out.println(Common.colourise("&fWelcome to the CLI version of the TextApp."));
-
-        if (ip4 == null || !loggedon) {
-            System.out.println("Please enter the server's IP address. (IPV4)");
-            getIp4();
-            System.out.println(Common.colourise("&aConnected."));
-        }
+        System.out.println(Common.colourise("&aWelcome to the TextClient! This is a very experimental version."));
         try {
-            if (ip4 == null) {
-                System.out.println(Common.colourise("No IP Specified. Program will now exit."));
-                return;
+            while (req != null) {
+                System.out.println("Please enter a remote host to connect to.");
+                Inet4Address remoteAddress = null;
+                try {
+                    Scanner scanner = new Scanner(System.in);
+                    req = scanner.next();
+                    switch (req.toLowerCase()) {
+                        case "exit":
+                            System.out.println(Common.colourise("&aThank you and goodbye."));
+                            return;
+                        case "help":
+                            System.out.println(Common.colourise("&aCurrently this feature is disabled."));
+                            continue;
+                        default:
+                            remoteAddress = (Inet4Address) Inet4Address.getByName(req);
+                    }
+                }
+                catch (UnknownHostException ex) {
+                    System.out.println(Common.colourise("&cInvalid hostname."));
+                    ex.printStackTrace();
+                    continue;
+                }
+                catch (IllegalArgumentException ex) {
+                    System.out.println(Common.colourise("&bInvalid Port."));
+                }
+                if (remoteAddress == null) {
+                    continue;
+                }
+                System.out.println(Common.colourise("&bPlease enter a port."));
+                try {
+                    String req = checkInput();
+                    if (Integer.valueOf(req) > 66556 || Integer.valueOf(req) < 0) {
+                        System.out.println("Invalid host");
+                        continue;
+                    }
+                    client = new TextClient(remoteAddress, Integer.valueOf(req));
+                } catch (IllegalArgumentException ex) {
+                    System.out.println(Common.colourise("&cInvalid host.&r"));
+                    continue;
+                }
+                System.out.println(Common.colourise("&dSuccessfully connected to: " + remoteAddress.getHostAddress()));
+
+                Object remote = client.checkForMessage(1000);
+                if (remote != null) {
+                    if (remote.getClass().isAssignableFrom(String.class)) {
+                        System.out.println(Common.colourise((String) remote));
+                    } else {
+                        System.out.println("&e[Remote] Sent a custom Object.");
+                    }
+                }
+                req = checkInput();
+                if (req != null) {
+                    client.sendMessage(req);
+                }
             }
-            client = new TextClient(9951, ip4);
-            client.start();
-            client.sendMessage(clientID.toString());
-            checkInput();
-            System.out.println(Common.colourise("&aGood bye!"));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            if (client != null && client.isAlive()) {
-                client.disconnect();
-            }
-            loggedon = false;
         }
-        if (client != null && client.isAlive()) {
-            client.disconnect();
+        catch (IOException ex) {
+            ex.printStackTrace()
         }
-
-    }
-
-    private static Inet4Address getIp4() {
+      
+    private static String checkInput() throws IOException{
         Scanner scanner = new Scanner(System.in);
-        String string = scanner.next();
-        try {
-            ip4 = (Inet4Address) Inet4Address.getByName(string);
-            return ip4;
-        } catch (UnknownHostException ex) {
-            System.out.println("Invalid IP address.");
-            getIp4();
+        String next = scanner.next();
+        if (next.equalsIgnoreCase("null")) {
+            System.out.println("Illegal Argument!");
+            return null;
         }
-        return null;
-    }
-
-
-    private static void checkInput() throws IOException{
-        Scanner scanner = new Scanner(System.in);
-        switch (scanner.next().toLowerCase()) {
+        switch (next.toLowerCase()) {
             case "exit":
-                return;
+                System.out.println(Common.colourise("&aThank you and goodbye."));
+                scanner.close();
+                return null;
             case "help":
-                System.out.println(Common.colourise("&bTo send a message, just type anything that is not \"help\" or \"exit\""));
+                System.out.println(Common.colourise("&aCurrently this feature is disabled."));
+                scanner.close();
+                break;
                 default:
-                    client.sendMessage(scanner.next());
+                    if (client != null) {
+                        client.sendMessage(next);
+                    }
+                    scanner.close();
+                    return next;
         }
+        scanner.close();
+        return null;
     }
 }
